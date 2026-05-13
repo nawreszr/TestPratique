@@ -1,102 +1,50 @@
-volumes:
-  postgres_data:
-
-networks:
-  microservices-network:
-    driver: bridge
-
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: postgres
-    restart: unless-stopped
+    container_name: postgres-produits
     environment:
-      POSTGRES_DB: produits_db
+      POSTGRES_DB: produitsdb
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - microservices-network
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "5433:5432"
 
   redis:
     image: redis:7-alpine
     container_name: redis
     ports:
       - "6379:6379"
-    networks:
-      - microservices-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   eureka-server:
-    build:
-      context: ./eureka-server
+    build: ./eureka-server
     container_name: eureka-server
     ports:
       - "8761:8761"
-    networks:
-      - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
   produits-service:
-    build:
-      context: ./produits-service
+    build: ./produits-service
     container_name: produits-service
     ports:
       - "8091:8091"
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    environment:
-      SERVER_PORT: 8091
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/produits_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
-      EUREKA_URI: http://eureka-server:8761/eureka/
-    networks:
-      - microservices-network
+      - postgres
+      - redis
+      - eureka-server
 
   avis-service:
-    build:
-      context: ./avis-service
+    build: ./avis-service
     container_name: avis-service
     ports:
       - "8092:8092"
     depends_on:
-      postgres:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    environment:
-      SERVER_PORT: 8092
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/produits_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
-      POSTGRES_HOST: postgres
-      EUREKA_URI: http://eureka-server:8761/eureka/
-    networks:
-      - microservices-network
+      - postgres
+      - eureka-server
 
   api-gateway:
     build:
@@ -107,7 +55,7 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
-    environment:
-      EUREKA_URI: http://eureka-server:8761/eureka/
-    networks:
-      - microservices-network
+      produits-service:
+        condition: service_started
+      avis-service:
+        condition: service_started
