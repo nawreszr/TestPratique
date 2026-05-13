@@ -15,14 +15,12 @@ public class ProduitService {
 
     private final ProduitRepository produitRepository;
 
-    @Cacheable(value = "produits", key = "'all'")
-    public List<Produit> findAll() {
+    @Cacheable(value = "produits", key = "#categorieId ?: 'all'")
+    public List<Produit> findAll(Long categorieId) {
+        if (categorieId != null) {
+            return produitRepository.findByCategorieId(categorieId);
+        }
         return produitRepository.findAll();
-    }
-
-    @Cacheable(value = "produits", key = "#categorieId")
-    public List<Produit> findByCategorie(Long categorieId) {
-        return produitRepository.findByCategorieId(categorieId);
     }
 
     public Produit findById(Long id) {

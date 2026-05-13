@@ -3,13 +3,11 @@ package com.example.produitsservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serializable;
-
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Produit implements Serializable {
+public class Produit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
