@@ -9,5 +9,5 @@ FROM eclipse-temurin:25-jre-alpine
 RUN apk add --no-cache curl
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8081
+EXPOSE 8091
 ENTRYPOINT ["java", "-jar", "app.jar"]
