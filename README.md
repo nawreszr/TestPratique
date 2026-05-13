@@ -15,7 +15,7 @@ Ce projet est une application de commerce électronique basée sur une architect
 ## 🚀 Lancement du Projet
 
 ### 1. Prérequis
-- Java 21+
+- JDK 25
 - Node.js & npm
 - Docker & Docker Compose (optionnel mais recommandé)
 - PostgreSQL & Redis (pour le service produits)
