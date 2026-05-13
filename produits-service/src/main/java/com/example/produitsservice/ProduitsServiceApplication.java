@@ -7,6 +7,7 @@ import org.springframework.cache.annotation.EnableCaching;
 
 @SpringBootApplication
 @EnableCaching
+@org.springframework.cloud.client.discovery.EnableDiscoveryClient
 public class ProduitsServiceApplication {
 
     public static void main(String[] args) {
