@@ -6,6 +6,7 @@ networks:
     driver: bridge
 
 services:
+  # Database Service (Port 5432)
   postgres:
     image: postgres:15-alpine
     container_name: postgres
@@ -26,6 +27,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # Cache Service (Port 6379)
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -39,6 +41,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # Eureka Discovery Server (Port 8761)
   eureka-server:
     build:
       context: ./eureka-server
@@ -53,6 +56,7 @@ services:
       timeout: 10s
       retries: 5
 
+  # Microservice Produits (Port 8091)
   produits-service:
     build:
       context: ./produits-service
@@ -77,6 +81,7 @@ services:
     networks:
       - microservices-network
 
+  # Microservice Avis (Port 8092)
   avis-service:
     build:
       context: ./avis-service
@@ -98,6 +103,7 @@ services:
     networks:
       - microservices-network
 
+  # API Gateway (Port 8090)
   api-gateway:
     build:
       context: ./api-gateway
